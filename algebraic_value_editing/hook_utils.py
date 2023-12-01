@@ -71,6 +71,11 @@ def get_activation_dict(
                 activation_dict[activation_addition.act_name].append(
                     get_dataset_activations_difference(model, activation_addition)
                 )
+            else:
+                # Don't do mean-centring, just take averages
+                activation_dict[activation_addition.act_name].append(
+                    get_dataset_activations(model, activation_addition)
+                )
 
         # Otherwise, use normal prompt activations
         else:

@@ -145,10 +145,24 @@ def get_dataset_activations(
     """
     # Get the principal component for the activations of this dataset at the relevant layer
     # TODO: Implement this method, decide if I want it to be a method
-    principal_component = activation_principal_component(model, activation_addition)
+    if activation_addition.feature_vector_cache is not None:
+        return activation_addition.coeff * activation_addition.feature_vector_cache
 
-    # Return cached activations times coefficient
-    return activation_addition.coeff * principal_component
+    target_dataset = activation_addition.prompt
+    location = activation_addition.location
+    use_all_activations = activation_addition.use_all_activations
+
+    feature_vector = dataset_svd.utils.find_activations_centre(
+        model=model,
+        dataset=target_dataset,
+        location=location,
+        max_batch_size=2,
+        use_all_activations=use_all_activations,
+    ).reshape(1, 1, -1).cuda()
+
+    activation_addition.feature_vector_cache = feature_vector
+
+    return activation_addition.coeff * feature_vector
 
 
 def get_dataset_activations_difference(
